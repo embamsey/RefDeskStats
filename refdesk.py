@@ -290,7 +290,8 @@ def get_weekdayArray(date):
     try:
         data = get_db()
         cur = data.cursor()
-        cur.execute("SELECT refstat, refcount, day_of_week FROM refview_day_of_week ORDER BY day_of_week", (str(date),))
+        month = str(date) + '%'
+        cur.execute("SELECT refstat, refcount, day_of_week FROM refview_day_of_week WHERE refdate::text LIKE %s ORDER BY day_of_week", (str(month),))
 
         helpcodes = {
             "dir": 1,
@@ -351,7 +352,15 @@ def parse_stat(stat):
 def get_missing():
     "Find the dates that are missing stats"
     try:
-        print("Hello")
+        data = get_db()
+        cur = data.cursor()
+        cur.execute()
+
+        
+        data.commit()
+        data.close()
+
+        return missing
     except Exception, e:
 	    print(e)
 
@@ -361,14 +370,12 @@ def show_stats(date=None):
     "Lets try to get all dates with data input"
     try:
         if date:
-            "Selected month data is displayed"
             if len(str(date)) == 7:
                 tarray = get_timeArray(date)
                 wdarray = get_weekdayArray(date)
                 dates = get_stats()
                 months = get_months()
                 return render_template('show_mchart.html', dates=dates, tarray=tarray,date=date, wdarray=wdarray, months=months)
-            #"Selected day data is displayed"
             else:
                 array = get_dataArray(date)
                 tarray = get_timeArray(date)
