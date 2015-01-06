@@ -32,7 +32,7 @@ app.root_path = abspath(dirname(__file__))
 # Table permissions
 # GRANT SELECT, INSERT, UPDATE, DELETE ON refstats TO refstats;
 
-# View definition
+# View definition (most recent timestamps)
 # CREATE VIEW refview AS WITH x AS (
 #    SELECT refstat, refdate, MAX(create_time)
 #    AS create_time FROM refstats
@@ -43,6 +43,12 @@ app.root_path = abspath(dirname(__file__))
 #       x.refstat = r.refstat AND
 #       x.refdate = r.refdate)
 #    ORDER BY refstat;
+
+# View definition (add the day of week to refview)
+# CREATE VIEW refview_day_of_week AS
+#    SELECT refstat, refdate, EXTRACT(DOW FROM refdate)
+#    AS day_of_week, create_time, refcount
+#    FROM refview;
 
 def get_db():
     """
@@ -129,7 +135,7 @@ def get_months():
         #months = [dict(month=row[0]) for row in cur.fetchall()]
         dbase.commit()
         dbase.close()
-        print(months)
+        #print(months)
         return months
     except Exception, e:
         print(e)
@@ -274,8 +280,57 @@ def get_timeArray(date):
         for time in [time1, time2, time3, time4, time5, time6, time7, time8, time9, time10, time11]:
             stack.append(time)
             #print(time)
-        print(stack)
+        #print(stack)
         return stack
+    except Exception, e:
+        print(e)
+
+def get_weekdayArray(date):
+    "Put the data into an array for google charts"
+    try:
+        data = get_db()
+        cur = data.cursor()
+        cur.execute("SELECT refstat, refcount, day_of_week FROM refview_day_of_week ORDER BY day_of_week", (str(date),))
+
+        helpcodes = {
+            "dir": 1,
+            "equipment": 2,
+            "help": 3,
+            "ithelp": 4,
+            "referral": 5
+        }
+    
+        stack = [['Days_of_Week','Directional','Equipment','Help with Collections/Services','Help with Printers/Software','Referral to Librarian',{ 'role': 'annotation' } ]]
+        days = [["Sunday", 0, 0, 0, 0, 0, ''], ["Monday", 0, 0, 0, 0, 0, ''], ["Tuesday", 0, 0, 0, 0, 0, ''], ["Wednesday", 0, 0, 0, 0, 0, ''], ["Thursday", 0, 0, 0, 0, 0, ''], ["Friday", 0, 0, 0, 0, 0, ''], ["Saturday", 0, 0, 0, 0, 0, '']] 
+
+        for row in cur.fetchall():
+            "Get the data for each day of the month and do something useful with it"
+            timeslot, stat = parse_stat(row[0])
+            if row[2] == 0:
+                days[0][helpcodes[stat]] += row[1]
+            elif row[2] == 1:
+                days[1][helpcodes[stat]] += row[1]
+            elif row[2] == 2:
+                days[2][helpcodes[stat]] += row[1]
+            elif row[2] == 3:
+                days[3][helpcodes[stat]] += row[1]
+            elif row[2] == 4:
+                days[4][helpcodes[stat]] += row[1]
+            elif row[2] == 5:
+                days[5][helpcodes[stat]] += row[1]
+            elif row[2] == 6:
+                days[6][helpcodes[stat]] += row[1]
+
+        data.commit()
+        data.close()
+
+        for day in days:
+            stack.append(day)
+
+        #print(stack)
+        return stack
+
+
     except Exception, e:
         print(e)
 
@@ -306,11 +361,14 @@ def show_stats(date=None):
     "Lets try to get all dates with data input"
     try:
         if date:
+            "Selected month data is displayed"
             if len(str(date)) == 7:
                 tarray = get_timeArray(date)
+                wdarray = get_weekdayArray(date)
                 dates = get_stats()
                 months = get_months()
-                return render_template('show_mchart.html', dates=dates, tarray=tarray,date=date, months=months)
+                return render_template('show_mchart.html', dates=dates, tarray=tarray,date=date, wdarray=wdarray, months=months)
+            #"Selected day data is displayed"
             else:
                 array = get_dataArray(date)
                 tarray = get_timeArray(date)
