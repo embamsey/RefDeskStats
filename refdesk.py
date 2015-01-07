@@ -128,7 +128,7 @@ def get_months():
     try:
         dbase = get_db()
         cur = dbase.cursor()
-        cur.execute("SELECT DISTINCT date_part('year',refdate)|| '-' ||date_part('month',refdate) AS date_piece, (date_part('year',refdate)|| '-' ||date_part('month',refdate)|| '-01')::date AS date FROM refview GROUP BY date_piece ORDER BY date asc")
+        cur.execute("SELECT DISTINCT date_part('year',refdate)|| '-' ||date_part('month',refdate) AS date_piece, (date_part('year',refdate)|| '-' ||date_part('month',refdate)|| '-01')::date AS date FROM refview GROUP BY date_piece ORDER BY date desc")
         months = []
         for row in cur.fetchall():
             year, month = parse_date(row[1])
