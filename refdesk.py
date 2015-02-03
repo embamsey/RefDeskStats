@@ -487,7 +487,7 @@ def edit_data(date):
                 #return render_template('stat_form.html', today=date)
                 #return render_template('edit_stat_form.html', today=date, stats=stats)
         else:
-            return render_template('stat_form.html', today=((datetime.datetime.now() + datetime.timedelta(hours=-2)).date().isoformat()))
+            return render_template('stat_form.html', today=((datetime.datetime.now() + datetime.timedelta(hours=-2)).date().isoformat()), stats={})
     except:
         return abort(500)
 
