@@ -9,13 +9,14 @@ import psycopg2
 import StringIO
 import csv
 
-#URL_BASE = '/refdesk-stats/'
-URL_BASE = '/'
+URL_BASE = '/refdesk-stats/'
+#URL_BASE = '/'
 
 # Database connection info
 DB_NAME = 'refstats'
 #DB_HOST = 'localhost'
-DB_USER = 'refstats'
+#DB_USER = 'refstats'
+DB_USER = 'ebamsey'
 
 app = Flask(__name__)
 app.root_path = abspath(dirname(__file__))
@@ -495,4 +496,4 @@ def download_file(filename=None):
         return abort(500)
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5555)
+    app.run(debug=True, host="0.0.0.0", port=6666)
