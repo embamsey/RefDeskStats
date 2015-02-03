@@ -165,9 +165,11 @@ def get_csv(filename):
         if str(filename) == 'allstats.csv':
             cur.execute("SELECT refdate, refstat, refcount FROM refview")
         else:
+            file_parts = filename.split('.')
+            file_name = file_parts[0]
             cur.execute("""SELECT refdate, refstat, refcount
                         FROM refview WHERE refdate=%s""",
-                        (str(filename),))
+                        (str(file_name),))
         csvgen = StringIO.StringIO()
         csvfile = csv.writer(csvgen)
         for row in cur.fetchall():
@@ -499,7 +501,7 @@ def download_file(filename=None):
         if filename:
             filename = str(filename)
             csv_data = get_csv(filename)
-            csv_file = filename + ".csv"
+            csv_file = filename
         else:
             csv_data = get_csv('alldata')
             csv_file = filename
